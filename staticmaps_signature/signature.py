@@ -5,7 +5,10 @@ Author: allrod5 (github.com/allrod5)
 import hashlib
 import hmac
 import base64
-import urlparse
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 
 class StaticMapURLSigner(object):
@@ -103,7 +106,8 @@ class StaticMapURLSigner(object):
 
         # Create a signature using the private key and the URL-encoded
         # string using HMAC SHA1. This signature will be binary.
-        signature = hmac.new(decoded_key, url_to_sign, hashlib.sha1)
+        signature = hmac.new(
+            decoded_key, str.encode(url_to_sign), hashlib.sha1)
 
         # Encode the binary signature into base64 for use within a URL
         encoded_signature = base64.urlsafe_b64encode(signature.digest())
