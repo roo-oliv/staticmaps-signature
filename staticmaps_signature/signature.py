@@ -1,6 +1,6 @@
 """
 Adapted from: https://github.com/googlemaps/url-signing
-Author: allrod5 (github.com/allrod5)
+Author: Rodrigo Martins de Oliveira (github.com/allrod5)
 """
 import hashlib
 import hmac
@@ -55,13 +55,9 @@ class StaticMapURLSigner(object):
     def sign_url(self, input_url):
         # type: (str) -> str
         """
-        Generates an URL based on the `input_url` and appended with a
-        public key (`&key=<PUBLIC_KEY>`) if the parameter `public_key`
-        is initialized and an unique signature generated with the
-        `input_url` (appended with the public key if it is initialized)
-        and the `private_key` (`&signature=<UNIQUE_SIGNATURE>`) if the
-        parameter `private_key` is initialized to parameters to the
-        query string of an URL.
+        Generates a signed URL from the `input_url` if
+        :class:`StaticMapURLSigner` is provided with a private key,
+        otherwise just the public key will be appended to the URL.
 
         Usage:
         >>> from staticmaps_signature import StaticMapURLSigner
@@ -73,8 +69,9 @@ class StaticMapURLSigner(object):
         input_url - StaticMap API request URL
 
         Returns:
-        The request URL appended by an API Key and a signature (if
-        `private_key` was provided)
+        The request URL appended by an API Key or Client ID and a
+        signature (if `private_key` was provided to
+        :class:`StaticMapURLSigner`)
         """
 
         if not input_url:
