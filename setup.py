@@ -29,7 +29,7 @@ def grep(attrname):
 
 
 setup(
-    name='staticmaps_signature',
+    name='staticmaps-signature',
     version=grep('__version__'),
     url='https://github.com/allrod5/staticmaps-signature/',
     license='MIT',
@@ -49,5 +49,6 @@ setup(
     ],
     tests_require=[
         'pytest',
+        'coveralls',
     ],
 )

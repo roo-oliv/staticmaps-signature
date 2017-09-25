@@ -12,5 +12,5 @@ install:
 script:
   - coverage run --source=staticmaps_signature setup.py test
 
-command:
+after_success:
   - coveralls
