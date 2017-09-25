@@ -5,9 +5,18 @@ Easily sign Google StaticMap API request urls with your API Key or Client ID.
 
 Python 2.x and 3.x are supported.
 
-.. image:: https://travis-ci.org/allrod5/staticmaps-signature.svg?branch=master
+.. |build| image:: https://travis-ci.org/allrod5/staticmaps-signature.svg?branch=master
     :target: https://travis-ci.org/allrod5/staticmaps-signature
+    :scale: 100%
+    :align: middle
+.. |coverage| image:: https://coveralls.io/repos/github/allrod5/staticmaps-signature/badge.svg?branch=master
+    :target: https://coveralls.io/github/allrod5/staticmaps-signature?branch=master
+    :scale: 100%
+    :align: middle
 
++---------+------------+
+| |build| | |coverage| |
++---------+------------+
 
 Usage
 -----
