@@ -18,7 +18,7 @@ class StaticMapURLSigner(object):
     def __init__(
             self, client_id=None, public_key=None, private_key=None,
             verify_endpoint=True):
-        # type: (str, str, str, str, bool) -> None
+        # type: (str, str, str, bool) -> None
         """
         StaticMap URL Signer offers the ability to generate a Google
         StaticMap API request URL appended with an API Key or Client ID
@@ -85,43 +85,43 @@ class StaticMapURLSigner(object):
         if not input_url:
             raise ValueError("`input_url` cannot be None")
 
-        url = urlparse.urlparse(input_url)
+        scheme, netloc, path, _, query, _ = urlparse.urlparse(input_url)
 
         if self.verify_endpoint:
-            if url.scheme != self.staticmap_api_endpoint.scheme:
-                url.scheme = self.staticmap_api_endpoint.scheme
+            if scheme != self.staticmap_api_endpoint.scheme:
                 logging.warning(
-                    "URL scheme remapped to `{scheme}`",
-                    scheme=self.staticmap_api_endpoint.scheme)
-            if url.netloc != self.staticmap_api_endpoint.netloc:
-                url.netloc = self.staticmap_api_endpoint.netloc
+                    "URL scheme `%s` remapped to `%s`", scheme,
+                    self.staticmap_api_endpoint.scheme)
+                scheme = self.staticmap_api_endpoint.scheme
+            if netloc != self.staticmap_api_endpoint.netloc:
                 logging.warning(
-                    "URL netloc remapped to `{netloc}`",
-                    netloc=self.staticmap_api_endpoint.netloc)
-            if url.path != self.staticmap_api_endpoint.path:
-                url.path = self.staticmap_api_endpoint.path
+                    "URL netloc `%s` remapped to `%s`", netloc,
+                    self.staticmap_api_endpoint.netloc)
+                netloc = self.staticmap_api_endpoint.netloc
+            if path != self.staticmap_api_endpoint.path:
                 logging.warning(
-                    "URL path remapped to `{path}`",
-                    netloc=self.staticmap_api_endpoint.path)
+                    "URL path `%s` remapped to `%s`", path,
+                    self.staticmap_api_endpoint.path)
+                path = self.staticmap_api_endpoint.path
 
         if self.client_id is not None:
             query_string = "client_id={client_id}&{query_params}".format(
-                client_id=self.client_id, query_params=url.query)
+                client_id=self.client_id, query_params=query)
         elif self.public_key is not None:
             query_string = "key={key}&{query_params}".format(
-                key=self.public_key, query_params=url.query)
+                key=self.public_key, query_params=query)
         else:
-            query_string = "{query_params}".format(query_params=url.query)
+            query_string = "{query_params}".format(query_params=query)
 
         url_model = "{scheme}://{netloc}{path}?{query_string}"
 
         if not self.private_key:
             return url_model.format(
-                scheme=url.scheme, netloc=url.netloc, path=url.path,
+                scheme=scheme, netloc=netloc, path=path,
                 query_string=query_string)
 
         # We only need to sign the path+query part of the string
-        url_to_sign = url.path + "?" + query_string
+        url_to_sign = path + "?" + query_string
 
         # Decode the private key into its binary format
         # We need to decode the URL-encoded private key
@@ -140,5 +140,4 @@ class StaticMapURLSigner(object):
 
         # Return signed URL
         return url_model.format(
-                scheme=url.scheme, netloc=url.netloc, path=url.path,
-                query_string=query_string)
+            scheme=scheme, netloc=netloc, path=path, query_string=query_string)
