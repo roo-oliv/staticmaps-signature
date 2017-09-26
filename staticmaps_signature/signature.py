@@ -5,6 +5,9 @@ Author: Rodrigo Martins de Oliveira (github.com/allrod5)
 import hashlib
 import hmac
 import base64
+
+import logging
+
 try:
     import urlparse
 except ImportError:
@@ -12,8 +15,10 @@ except ImportError:
 
 
 class StaticMapURLSigner(object):
-    def __init__(self, client_id=None, public_key=None, private_key=None):
-        # type: (str, str, str, str) -> None
+    def __init__(
+            self, client_id=None, public_key=None, private_key=None,
+            verify_endpoint=True):
+        # type: (str, str, str, str, bool) -> None
         """
         StaticMap URL Signer offers the ability to generate a Google
         StaticMap API request URL appended with an API Key or Client ID
@@ -32,13 +37,17 @@ class StaticMapURLSigner(object):
         then setting also parameter `private_key` is mandatory.
 
         Args:
-        client_id   - StaticMap Client ID
-        public_key  - StaticMap API Key
-        private_key - StaticMap shared secret
+        client_id       - StaticMap Client ID
+        public_key      - StaticMap API Key
+        private_key     - StaticMap shared secret
+        verify_endpoint - Flag to verify the URL endpoint
         """
         self.client_id = client_id
         self.public_key = public_key
         self.private_key = private_key
+        self.verify_endpoint = verify_endpoint
+        self.staticmap_api_endpoint = urlparse.urlparse(
+            "https://maps.googleapis.com/maps/api/staticmap")
         if self.client_id is not None:
             if self.public_key is not None:
                 raise ValueError(
@@ -73,11 +82,28 @@ class StaticMapURLSigner(object):
         signature (if `private_key` was provided to
         :class:`StaticMapURLSigner`)
         """
-
         if not input_url:
             raise ValueError("`input_url` cannot be None")
 
         url = urlparse.urlparse(input_url)
+
+        if self.verify_endpoint:
+            if url.scheme != self.staticmap_api_endpoint.scheme:
+                url.scheme = self.staticmap_api_endpoint.scheme
+                logging.warning(
+                    "URL scheme remapped to `{scheme}`",
+                    scheme=self.staticmap_api_endpoint.scheme)
+            if url.netloc != self.staticmap_api_endpoint.netloc:
+                url.netloc = self.staticmap_api_endpoint.netloc
+                logging.warning(
+                    "URL netloc remapped to `{netloc}`",
+                    netloc=self.staticmap_api_endpoint.netloc)
+            if url.path != self.staticmap_api_endpoint.path:
+                url.path = self.staticmap_api_endpoint.path
+                logging.warning(
+                    "URL path remapped to `{path}`",
+                    netloc=self.staticmap_api_endpoint.path)
+
         if self.client_id is not None:
             query_string = "client_id={client_id}&{query_params}".format(
                 client_id=self.client_id, query_params=url.query)
