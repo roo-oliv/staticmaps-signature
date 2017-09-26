@@ -136,7 +136,7 @@ class StaticMapURLSigner(object):
         encoded_signature = base64.urlsafe_b64encode(signature.digest())
 
         query_string += "&signature={signature}".format(
-            signature=encoded_signature)
+            signature=encoded_signature.decode())
 
         # Return signed URL
         return url_model.format(
