@@ -1,9 +1,9 @@
+import pytest
+
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-
-import pytest
 
 from staticmaps_signature import StaticMapURLSigner
 
@@ -12,25 +12,24 @@ PUBLIC_KEY = "Zy4aSIA1Q7KXFsGy4ulx1qS0-PQXefghOBcPH2E"
 PRIVATE_KEY = "cwAPISuAyZSrGwXG-qzjMLPPvRE="
 
 
+@pytest.fixture('function')
+def logging_stub(mocker):
+    return mocker.patch("staticmaps_signature.signature.logging")
+
+
+@pytest.mark.usefixtures('logging_stub')
 class TestStaticMapURLSigner(object):
     def test_init(self):
-        with pytest.raises(ValueError):
-            StaticMapURLSigner()
-
-        with pytest.raises(ValueError):
-            StaticMapURLSigner(
-                client_id=CLIENT_ID, public_key=PUBLIC_KEY,
-                private_key=PRIVATE_KEY)
-
-        with pytest.raises(ValueError):
-            StaticMapURLSigner(client_id=CLIENT_ID)
-
-        StaticMapURLSigner(client_id=CLIENT_ID, private_key=PRIVATE_KEY)
-        StaticMapURLSigner(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
+        StaticMapURLSigner()
+        StaticMapURLSigner(client_id=CLIENT_ID)
         StaticMapURLSigner(public_key=PUBLIC_KEY)
         StaticMapURLSigner(private_key=PRIVATE_KEY)
+        StaticMapURLSigner(client_id=CLIENT_ID, private_key=PRIVATE_KEY)
+        StaticMapURLSigner(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
+        StaticMapURLSigner(client_id=CLIENT_ID, public_key=PUBLIC_KEY,
+                           private_key=PRIVATE_KEY)
 
-    def test_signature(self, mocker):
+    def test_signature(self):
         # given
         request_url = (
             "https://maps.googleapis.com/maps/api/staticmap"
@@ -52,7 +51,6 @@ class TestStaticMapURLSigner(object):
             "https://maps.googleapis.com/staticmap"
             "?center=-23.5509518,-46.6921805&markers=-23.5509518,-46.6921805"
             "&zoom=15&size=300x200&maptype=roadmap")
-        logging = mocker.patch("staticmaps_signature.signature.logging")
         client_id_signer = StaticMapURLSigner(
             client_id=CLIENT_ID, private_key=PRIVATE_KEY)
         public_key_signer = StaticMapURLSigner(
@@ -100,4 +98,3 @@ class TestStaticMapURLSigner(object):
                 == client_id_signer.staticmap_api_endpoint.path)
         assert (urlparse.urlparse(uncorrected_netloc).netloc
                 == urlparse.urlparse(bad_endpoint_netloc_url).netloc)
-        assert logging.warning.call_count == 3
